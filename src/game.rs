@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 use crate::board::{Board};
-use crate::config::{PLAYER1_EVAL, PLAYER2_EVAL};
+use crate::config::{PLAYER1_EVAL, PLAYER1_HUMAN, PLAYER2_EVAL, PLAYER2_HUMAN};
 use crate::evaluation::Evaluation;
 use crate::minmax::Minmax;
 use crate::user_input;
@@ -9,7 +9,10 @@ use crate::user_input;
 pub struct Game {}
 
 impl Game {
-    pub fn run(player1_human: bool, player2_human: bool) {
+    pub fn run() {
+
+        let player1_human: bool = PLAYER1_HUMAN;
+        let player2_human: bool = PLAYER2_HUMAN;
 
         let mut current_player: char = 'W';
         let mut current_board = Board::create_board();
