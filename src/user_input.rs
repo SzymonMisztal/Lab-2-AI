@@ -1,5 +1,9 @@
+use std::io;
+use std::io::Write;
+
 pub fn get_input(prompt: &str) -> String{
-    println!("{}",prompt);
+    print!("{}",prompt);
+    io::stdout().flush();
     let mut input = String::new();
     match std::io::stdin().read_line(&mut input) {
         Ok(_goes_into_input_above) => {},

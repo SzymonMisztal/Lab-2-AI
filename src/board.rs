@@ -1,3 +1,7 @@
+use std::fmt;
+use crate::config::{FLIP_INDICATOR, MOVE_INDICATOR};
+
+
 pub struct Board {}
 
 impl Board {
@@ -22,14 +26,30 @@ impl Board {
         return board;
     }
 
-    pub fn print_board(board: &[[char; 8]; 8]) {
+    pub fn print_board(board: &[[char; 8]; 8], changes: &Vec<(usize, usize)>, last_move: (usize, usize)) {
         println!("╔═══╦═══╦═══╦═══╦═══╦═══╦═══╦═══╗");
-        for (i, y) in board.iter().enumerate() {
-            for x in y.iter() {
-                print!("║ {} ", x);
+        for (y, row) in board.iter().enumerate() {
+            for (x, ch) in row.iter().enumerate() {
+                print!("║{change}{character}{change}", character = ch, change =
+                    if last_move.0 == y && last_move.1 == x { MOVE_INDICATOR }
+                    else if changes.iter().any(|&(a, b)| a == y && b == x) { FLIP_INDICATOR }
+                    else {' '});
             }
             println!("║");
-            if i != board.len() - 1 {
+            if y != board.len() - 1 {
+                println!("╠═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╣");
+            }
+        }
+        println!("╚═══╩═══╩═══╩═══╩═══╩═══╩═══╩═══╝");
+    }
+    pub fn print_board2(board: &[[char; 8]; 8]) {
+        println!("╔═══╦═══╦═══╦═══╦═══╦═══╦═══╦═══╗");
+        for (y, row) in board.iter().enumerate() {
+            for (x, ch) in row.iter().enumerate() {
+                print!("║ {character} ", character = ch);
+            }
+            println!("║");
+            if y != board.len() - 1 {
                 println!("╠═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╣");
             }
         }

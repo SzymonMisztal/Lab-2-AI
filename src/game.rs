@@ -1,6 +1,10 @@
+use std::borrow::Borrow;
 use crate::board::{Board};
+use crate::config::{PLAYER1_EVAL, PLAYER2_EVAL};
+use crate::evaluation::Evaluation;
 use crate::minmax::Minmax;
 use crate::user_input;
+
 
 pub struct Game {}
 
@@ -9,6 +13,9 @@ impl Game {
 
         let mut current_player: char = 'W';
         let mut current_board = Board::create_board();
+        let mut changes: Vec<(usize, usize)> = Vec::new();
+
+        Board::print_board(&current_board, &changes, (usize::MAX, usize::MAX));
 
         loop {
 
@@ -27,14 +34,13 @@ impl Game {
             }
 
             if human {
-                Board::print_board(&current_board);
-
                 loop {
                     let x: isize = user_input::get_input("Get x: ").parse::<isize>().unwrap() - 1;
                     let y: isize = user_input::get_input("Get y: ").parse::<isize>().unwrap() - 1;
 
                     if y>0 && x>0 && possible_moves.iter().any(|&(a, b)| a == y as usize && b == x as usize) {
-                        Self::make_move(&mut current_board, y as usize, x as usize, current_player);
+                        changes = Self::make_move(&mut current_board, y as usize, x as usize, current_player);
+                        Board::print_board(&current_board, &changes, (y as usize, x as usize));
                         break
                     }
 
@@ -42,8 +48,13 @@ impl Game {
                 }
             }
             else {
-                let best_move = Minmax::best_move(&current_board, possible_moves, current_player, 4);
-                Self::make_move(&mut current_board, best_move.0, best_move.1, current_player)
+                let best_move = Minmax::best_move(&current_board, possible_moves, current_player,
+                match current_player {
+                    'W' => PLAYER1_EVAL.borrow(),
+                    _ => PLAYER2_EVAL.borrow()
+                });
+                changes = Self::make_move(&mut current_board, best_move.0, best_move.1, current_player);
+                Board::print_board(&current_board, &changes, best_move);
             }
 
             current_player = Self::swap_player(current_player);
@@ -161,26 +172,30 @@ impl Game {
         println!("Score: {}:{}", results.0, results.1)
     }
 
-    fn make_move(board: &mut [[char; 8]; 8], y: usize, x: usize, player: char) {
+    pub fn make_move(board: &mut [[char; 8]; 8], y: usize, x: usize, player: char) -> Vec<(usize, usize)> {
 
-        if !Self::is_move_possible(board, y, x, player) { return }
+        let mut changes: Vec<(usize, usize)> = Vec::new();
+        if !Self::is_move_possible(board, y, x, player) { return changes }
 
         board[y][x] = player;
-        Self::star_swap(board, y, x, player)
+        changes.push((y, x));
+        Self::star_swap(board, y, x, player, &mut changes);
+
+        return changes.clone()
     }
 
-    fn star_swap(board: &mut [[char; 8]; 8], y: usize, x: usize, player: char) {
-        Self::line_swap(board, y, x, -1, -1, player);
-        Self::line_swap(board, y, x, -1, 0, player);
-        Self::line_swap(board, y, x, -1, 1, player);
-        Self::line_swap(board, y, x, 0, -1, player);
-        Self::line_swap(board, y, x, 0, 1, player);
-        Self::line_swap(board, y, x, 1, -1, player);
-        Self::line_swap(board, y, x, 1, 0, player);
-        Self::line_swap(board, y, x, 1, 1, player);
+    fn star_swap(board: &mut [[char; 8]; 8], y: usize, x: usize, player: char, changes: &mut Vec<(usize, usize)>) {
+        Self::line_swap(board, y, x, -1, -1, player, changes);
+        Self::line_swap(board, y, x, -1, 0, player, changes);
+        Self::line_swap(board, y, x, -1, 1, player, changes);
+        Self::line_swap(board, y, x, 0, -1, player, changes);
+        Self::line_swap(board, y, x, 0, 1, player, changes);
+        Self::line_swap(board, y, x, 1, -1, player, changes);
+        Self::line_swap(board, y, x, 1, 0, player, changes);
+        Self::line_swap(board, y, x, 1, 1, player, changes);
     }
 
-    fn line_swap(board: &mut [[char; 8]; 8], y: usize, x: usize, y_delta: isize, x_delta: isize, player: char) {
+    fn line_swap(board: &mut [[char; 8]; 8], y: usize, x: usize, y_delta: isize, x_delta: isize, player: char, changes: &mut Vec<(usize, usize)>) {
 
         if !Self::line_check(board, y, x, y_delta, x_delta, player) { return }
 
@@ -191,7 +206,8 @@ impl Game {
 
         while board[y_current][x_current] == enemy {
 
-            board[y_current][x_current] = enemy;
+            board[y_current][x_current] = player;
+            changes.push((y_current, x_current));
 
             y_current = (y_current as isize + y_delta) as usize;
             x_current = (x_current as isize + x_delta) as usize;
