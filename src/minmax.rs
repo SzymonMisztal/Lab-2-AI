@@ -49,7 +49,6 @@ impl Minmax {
     fn minmax(
         mut board: [[char; 8]; 8],
         player: char,
-        //evaluation: &Evaluation,
         maximizing: bool,
         depth: usize,
         mut alpha: isize,

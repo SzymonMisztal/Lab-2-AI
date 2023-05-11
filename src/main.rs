@@ -17,7 +17,7 @@ fn main() {
 
     let start_time = Instant::now();
 
-    Game::run(true, false);
+    Game::run(false, false);
 
     let end_time = Instant::now();
     let duration = end_time - start_time;

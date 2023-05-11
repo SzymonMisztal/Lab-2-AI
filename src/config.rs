@@ -2,8 +2,8 @@ use crate::evaluation::Evaluation;
 
 pub static PLAYER1_HUMAN: bool = false;
 pub static PLAYER2_HUMAN: bool = false;
-pub static PLAYER1_DEPTH: usize = 2;
-pub static PLAYER2_DEPTH: usize = 4;
+pub static PLAYER1_DEPTH: usize = 4;
+pub static PLAYER2_DEPTH: usize = 2;
 pub static WINDOW_SIZE: i32 = 800;
 pub static MOVE_INDICATOR: char = '|';
 pub static FLIP_INDICATOR: char = '·';
